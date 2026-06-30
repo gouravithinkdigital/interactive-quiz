@@ -92,7 +92,7 @@ export default function App() {
             onClick={startQuiz}
             className="mt-6 w-full rounded-xl bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700"
           >
-            Start Quiz →
+            Start Quiz
           </button>
         </div>
       </div>
@@ -153,6 +153,7 @@ export default function App() {
             src={videoFile}
             controls
             autoPlay
+            playsInline
             onTimeUpdate={handleTimeUpdate}
             onEnded={handleVideoEnd}
             className="w-full"
