@@ -1,0 +1,61 @@
+export const questions = [
+  {
+    id: 1,
+    time: 5,
+    question: "What is React?",
+    options: ["Library", "Framework", "Language", "Database"],
+    answer: 0,
+  },
+  {
+    id: 2,
+    time: 10,
+    question: "Who developed React?",
+    options: ["Google", "Meta", "Microsoft", "Amazon"],
+    answer: 1,
+  },
+  {
+    id: 3,
+    time: 15,
+    question: "React uses which DOM?",
+    options: ["Shadow DOM", "Virtual DOM", "Real DOM", "Simple DOM"],
+    answer: 1,
+  },
+  {
+    id: 4,
+    time: 20,
+    question: "Which hook is used to manage state in a functional component?",
+    options: ["useEffect", "useState", "useRef", "useMemo"],
+    answer: 1,
+  },
+  {
+    id: 5,
+    time: 26,
+    question: "JSX stands for?",
+    options: [
+      "JavaScript XML",
+      "Java Syntax Extension",
+      "JSON XML",
+      "JavaScript Extension",
+    ],
+    answer: 0,
+  },
+  {
+    id: 6,
+    time: 32,
+    question: "Which hook is commonly used for side effects?",
+    options: ["useState", "useMemo", "useEffect", "useCallback"],
+    answer: 2,
+  },
+  {
+    id: 7,
+    time: 38,
+    question: "What command is commonly used to create a React app with Vite?",
+    options: [
+      "npm create vite@latest",
+      "npm create react-app",
+      "npx react-init",
+      "npm install react",
+    ],
+    answer: 0,
+  },
+];
