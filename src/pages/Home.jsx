@@ -74,7 +74,7 @@ export default function App() {
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 sm:p-6">
         <div className="w-full max-w-md rounded-3xl border border-slate-700 bg-slate-800/70 p-6 sm:p-8 shadow-2xl backdrop-blur">
           <h1 className="text-center text-3xl sm:text-4xl font-bold text-white">
-            Interactive Quiz
+            POSH Training Quiz
           </h1>
 
           <p className="mt-2 text-center text-sm sm:text-base text-slate-400">
@@ -103,7 +103,7 @@ export default function App() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-950 p-4">
         <div className="w-full max-w-md rounded-3xl bg-slate-800 p-6 sm:p-10 text-center shadow-2xl">
-          <div className="mb-4 text-6xl sm:text-7xl">🎉</div>
+          <div className="mb-4 text-6xl sm:text-7xl">{score >= 4 ? "🎉" : "😞"}</div>
 
           <h1 className="text-3xl sm:text-4xl font-bold text-white">
             Quiz Completed
@@ -125,7 +125,7 @@ export default function App() {
             onClick={restart}
             className="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700"
           >
-            Play Again
+            Try Again
           </button>
         </div>
       </div>
