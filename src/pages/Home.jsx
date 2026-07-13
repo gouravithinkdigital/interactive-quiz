@@ -256,8 +256,7 @@ export default function App() {
             ref={videoRef}
             src={`${videoFile}#t=0.001`} 
             controls
-            autoPlay
-            muted        
+            autoPlay        
             playsInline  
             crossOrigin="anonymous"
             onTimeUpdate={handleTimeUpdate}
