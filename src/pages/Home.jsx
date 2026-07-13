@@ -1,7 +1,8 @@
 import { useRef, useState } from "react";
 // import videoFile from "../assets/videos/lesson.mp4";
 import { questions } from "../utils/quiz.js";
-const videoFile = "https://res.cloudinary.com/bvbtlaxk/video/upload/q_auto,f_auto/v1/final_abof5e.mp4";
+// Corrected direct Cloudinary streaming URL
+const videoFile = "https://res.cloudinary.com/bvbtlaxk/video/upload/q_auto,f_mp4/v1/posh_act_done_final_given_for_the_question_part_vye7ju.mp4";
 
 export default function App() {
   const videoRef = useRef(null);
@@ -18,11 +19,19 @@ export default function App() {
   const [selectedIndex, setSelectedIndex] = useState(null);
 
   function startQuiz() {
-    if (!name.trim()) return;
+  if (!name.trim()) return;
 
-    localStorage.setItem("username", name);
-    setStarted(true);
-  }
+  localStorage.setItem("username", name);
+  setStarted(true);
+
+  setTimeout(() => {
+    if (videoRef.current) {
+      videoRef.current.play().catch((err) => {
+        console.log("Autoplay blocked by mobile browser policy: ", err);
+      });
+    }
+  }, 100);
+}
 
   function handleTimeUpdate() {
     if (!videoRef.current) return;
@@ -245,10 +254,12 @@ export default function App() {
         <div className="relative overflow-hidden rounded-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.6)]">
           <video
             ref={videoRef}
-            src={videoFile}
+            src={`${videoFile}#t=0.001`} 
             controls
             autoPlay
-            playsInline
+            muted        
+            playsInline  
+            crossOrigin="anonymous"
             onTimeUpdate={handleTimeUpdate}
             onEnded={handleVideoEnd}
             className="w-full"
