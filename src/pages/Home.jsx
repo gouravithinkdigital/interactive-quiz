@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
-import videoFile from "../assets/videos/lesson.mp4";
+// import videoFile from "../assets/videos/lesson.mp4";
 import { questions } from "../utils/quiz.js";
+const videoFile = "https://res.cloudinary.com/bvbtlaxk/video/upload/q_auto,f_auto/v1/final_abof5e.mp4";
 
 export default function App() {
   const videoRef = useRef(null);
