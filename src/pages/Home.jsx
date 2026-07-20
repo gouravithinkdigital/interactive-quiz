@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 // import videoFile from "../assets/videos/lesson.mp4";
 import { questions } from "../utils/quiz.js";
 // Corrected direct Cloudinary streaming URL
-const videoFile = "https://res.cloudinary.com/bvbtlaxk/video/upload/final_trident_bvqhed.mp4";
+const videoFile = "https://res.cloudinary.com/bvbtlaxk/video/upload/v1784533970/final_posh_act_byrjft.mp4";
 export default function App() {
   const videoRef = useRef(null);
 
