@@ -259,7 +259,6 @@ export default function App() {
           <video
             ref={videoRef}
             src={`${videoFile}#t=0.001`}
-            controls
             autoPlay
             playsInline
             crossOrigin="anonymous"
