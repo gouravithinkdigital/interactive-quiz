@@ -5,7 +5,7 @@ import { questions } from "../utils/quiz.js";
 const videoFile = "https://res.cloudinary.com/bvbtlaxk/video/upload/v1784628255/posh_act_finl_hai_ab_toh_qwbxrx.mp4";
 
 // Minimum number of correct answers required to pass
-const PASSING_SCORE = 5;
+const PASSING_SCORE = 8;
 
 export default function App() {
   const videoRef = useRef(null);
