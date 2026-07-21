@@ -3,6 +3,10 @@ import { useRef, useState } from "react";
 import { questions } from "../utils/quiz.js";
 // Corrected direct Cloudinary streaming URL
 const videoFile = "https://res.cloudinary.com/bvbtlaxk/video/upload/v1784628255/posh_act_finl_hai_ab_toh_qwbxrx.mp4";
+
+// Minimum number of correct answers required to pass
+const PASSING_SCORE = 5;
+
 export default function App() {
   const videoRef = useRef(null);
 
@@ -11,50 +15,26 @@ export default function App() {
   );
 
   const [started, setStarted] = useState(false);
+  const [quizActive, setQuizActive] = useState(false); // true once video ends and questions begin
+  const [quizIndex, setQuizIndex] = useState(0); // index into questions[] during the quiz
   const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [answered, setAnswered] = useState([]);
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(null);
 
   function startQuiz() {
-  if (!name.trim()) return;
+    if (!name.trim()) return;
 
-  localStorage.setItem("username", name);
-  setStarted(true);
+    localStorage.setItem("username", name);
+    setStarted(true);
 
-  setTimeout(() => {
-    if (videoRef.current) {
-      videoRef.current.play().catch((err) => {
-        console.log("Autoplay blocked by mobile browser policy: ", err);
-      });
-    }
-  }, 100);
-}
-
-  function handleTimeUpdate() {
-    if (!videoRef.current) return;
-
-    const currentTime = videoRef.current.currentTime;
-
-    const question = questions.find(
-      (q) =>
-        currentTime >= q.time &&
-        !answered.includes(q.id)
-    );
-
-    if (question) {
-      videoRef.current.pause();
-
-      if (document.fullscreenElement) {
-        document.exitFullscreen?.().catch(() => {});
+    setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.play().catch((err) => {
+          console.log("Autoplay blocked by mobile browser policy: ", err);
+        });
       }
-      if (videoRef.current.webkitDisplayingFullscreen) {
-        videoRef.current.webkitExitFullscreen?.();
-      }
-
-      setCurrentQuestion(question);
-    }
+    }, 100);
   }
 
   function submitAnswer(index) {
@@ -68,23 +48,40 @@ export default function App() {
     }
 
     setTimeout(() => {
-      setAnswered((prev) => [...prev, currentQuestion.id]);
-      setCurrentQuestion(null);
-      setSelectedIndex(null);
-      videoRef.current?.play();
+      const nextIndex = quizIndex + 1;
+
+      if (nextIndex < questions.length) {
+        // Move to the next question
+        setQuizIndex(nextIndex);
+        setCurrentQuestion(questions[nextIndex]);
+        setSelectedIndex(null);
+      } else {
+        // All questions answered - show results
+        setCurrentQuestion(null);
+        setSelectedIndex(null);
+        setQuizActive(false);
+        setFinished(true);
+        localStorage.removeItem("username");
+      }
     }, 900);
   }
 
   function handleVideoEnd() {
-    setFinished(true);
-    localStorage.removeItem("username");
+    // Video finished - now present all the questions, one at a time
+    setQuizIndex(0);
+    setScore(0);
+    setQuizActive(true);
+    setCurrentQuestion(questions[0]);
   }
 
   function restart() {
+    // Sends the user all the way back to the start screen: full video
+    // rewatch + full question set is required again before they can pass.
     setStarted(false);
+    setQuizActive(false);
     setFinished(false);
     setScore(0);
-    setAnswered([]);
+    setQuizIndex(0);
     setCurrentQuestion(null);
     setSelectedIndex(null);
 
@@ -93,7 +90,7 @@ export default function App() {
     }
   }
 
-  const passed = score >= Math.ceil(questions.length * 0.7);
+  const passed = score >= PASSING_SCORE;
 
   // ---------- START SCREEN ----------
   if (!started) {
@@ -120,8 +117,10 @@ export default function App() {
           </h1>
 
           <p className="mt-3 text-sm leading-relaxed text-[#9FB0CC]">
-            Watch the briefing in full. Questions will appear at relevant
-            points — answer each one to complete your training record.
+            Watch the briefing in full. Once it ends, you'll answer{" "}
+            {questions.length} questions. You need at least {PASSING_SCORE}{" "}
+            correct to pass — if not, you'll need to rewatch the video and
+            try again.
           </p>
 
           <div className="mt-8">
@@ -146,7 +145,7 @@ export default function App() {
           </button>
 
           <p className="mt-4 text-center text-[11px] text-[#5C6B89]">
-            {questions.length} checkpoints &middot; Estimated 12 minutes
+            {questions.length} questions &middot; Estimated 12 minutes
           </p>
         </div>
       </div>
@@ -184,7 +183,7 @@ export default function App() {
               <dd className="font-medium text-[#F7F5F1]">{name}</dd>
             </div>
             <div className="flex justify-between border-b border-white/5 pb-3">
-              <dt className="text-[#7C8BA8]">Checkpoints answered correctly</dt>
+              <dt className="text-[#7C8BA8]">Questions answered correctly</dt>
               <dd className="font-medium text-[#F7F5F1]">
                 {score} of {questions.length}
               </dd>
@@ -203,8 +202,9 @@ export default function App() {
 
           {!passed && (
             <p className="mt-5 rounded-lg bg-[#B5707A]/10 p-3 text-xs leading-relaxed text-[#D6A1A8]">
-              A score of {Math.ceil(questions.length * 0.7)} or higher is
-              required to pass. Review the briefing and try again.
+              A score of {PASSING_SCORE} or higher is required to pass. You
+              must rewatch the full briefing and answer all{" "}
+              {questions.length} questions again to continue.
             </p>
           )}
 
@@ -212,14 +212,14 @@ export default function App() {
             onClick={restart}
             className="mt-8 w-full rounded-lg border border-[#C9A06A]/50 bg-transparent py-3 text-sm font-semibold uppercase tracking-wide text-[#C9A06A] transition hover:bg-[#C9A06A]/10"
           >
-            {passed ? "Retake Module" : "Try Again"}
+            {passed ? "Retake Module" : "Rewatch and try again"}
           </button>
         </div>
       </div>
     );
   }
 
-  // ---------- QUIZ / VIDEO SCREEN ----------
+  // ---------- VIDEO / QUIZ SCREEN ----------
   return (
     <div className="min-h-screen bg-[#101A30] p-3 sm:p-8">
       <div className="mx-auto max-w-5xl">
@@ -233,42 +233,52 @@ export default function App() {
             </h1>
           </div>
 
-          <div className="flex items-center gap-3">
-            {questions.map((q, i) => (
-              <div
-                key={q.id}
-                className={`h-1.5 w-7 rounded-full transition-colors ${
-                  answered.includes(q.id)
-                    ? "bg-[#C9A06A]"
-                    : "bg-white/15"
-                }`}
-              />
-            ))}
-            <span className="ml-1 text-xs font-medium text-[#7C8BA8]">
-              {answered.length}/{questions.length}
-            </span>
-          </div>
+          {quizActive && (
+            <div className="flex items-center gap-3">
+              {questions.map((q, i) => (
+                <div
+                  key={q.id}
+                  className={`h-1.5 w-7 rounded-full transition-colors ${
+                    i < quizIndex
+                      ? "bg-[#C9A06A]"
+                      : i === quizIndex
+                      ? "bg-[#C9A06A]/50"
+                      : "bg-white/15"
+                  }`}
+                />
+              ))}
+              <span className="ml-1 text-xs font-medium text-[#7C8BA8]">
+                {quizIndex + (selectedIndex !== null ? 1 : 0)}/
+                {questions.length}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="relative overflow-hidden rounded-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.6)]">
           <video
             ref={videoRef}
-            src={`${videoFile}#t=0.001`} 
+            src={`${videoFile}#t=0.001`}
             controls
-            autoPlay        
-            playsInline  
+            autoPlay
+            playsInline
             crossOrigin="anonymous"
-            onTimeUpdate={handleTimeUpdate}
             onEnded={handleVideoEnd}
             className="w-full"
           />
         </div>
 
+        {quizActive && !currentQuestion && (
+          <p className="mt-6 text-center text-sm text-[#9FB0CC]">
+            Loading questions&hellip;
+          </p>
+        )}
+
         {currentQuestion && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A1020]/85 p-3 backdrop-blur-sm sm:p-4">
             <div className="w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border border-white/10 bg-[#16223D] p-5 sm:max-h-[90vh] sm:p-9">
               <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.18em] text-[#C9A06A]">
-                Checkpoint {answered.length + 1} of {questions.length}
+                Question {quizIndex + 1} of {questions.length}
               </p>
 
               <h2 className="mb-6 font-serif text-lg sm:text-2xl font-semibold leading-snug text-[#F7F5F1]">
