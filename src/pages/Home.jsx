@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { questions } from "../utils/quiz.js";
 
 // Corrected direct Cloudinary streaming URL
-const videoFile = "https://res.cloudinary.com/bvbtlaxk/video/upload/v1784703925/with_no_highlighter_subs_fpl4mn.mp4";
+const videoFile = "https://res.cloudinary.com/bvbtlaxk/video/upload/v1784715014/last_hai_22jul_baomq5.mp4";
 
 const PASSING_SCORE = 8;
 
