@@ -2,10 +2,32 @@ import { useRef, useState } from "react";
 // import videoFile from "../assets/videos/lesson.mp4";
 import { questions } from "../utils/quiz.js";
 // Corrected direct Cloudinary streaming URL
-const videoFile = "https://res.cloudinary.com/bvbtlaxk/video/upload/v1784628255/posh_act_finl_hai_ab_toh_qwbxrx.mp4";
+const videoFile = "https://res.cloudinary.com/bvbtlaxk/video/upload/v1784703925/with_no_highlighter_subs_fpl4mn.mp4";
 
-// Minimum number of correct answers required to pass
 const PASSING_SCORE = 8;
+
+const CHECKPOINTS = [
+  {
+    time: 56, // 0:56 - end of "what the POSH Act is / legal basis"
+    title: "The Legal Basis",
+    body: "The POSH Act (Sexual Harassment of Women at Workplace Act) is the law that gives this training its legal foundation — every workplace is legally required to comply with it.",
+  },
+  {
+    time: 110, // 1:50 - end of "who it protects / what counts as harassment"
+    title: "Who's Protected & What Counts",
+    body: "The law protects women in every workplace, regardless of sector. Sexual harassment includes unwelcome physical contact, standing too close, any behaviour that makes someone uncomfortable, and inappropriate gestures or remarks.",
+  },
+  {
+    time: 140, // 2:20 - end of history + quid pro quo intro
+    title: "Where the Law Came From",
+    body: "The POSH Act traces back to the Bhanwari Devi case and the Supreme Court petition that followed, which led to the Vishakha Guidelines. Harassment falls into two types — this section introduced 'quid pro quo': when a benefit or promotion is made conditional on a demand.",
+  },
+  {
+    time: 196, // 3:16 - end of workplace scenario dramatisation
+    title: "Recognising It in Practice",
+    body: "The scenario you just watched illustrated how this kind of behaviour can show up in everyday workplace interactions — often subtly, not always overt.",
+  },
+];
 
 export default function App() {
   const videoRef = useRef(null);
@@ -22,6 +44,11 @@ export default function App() {
   const [finished, setFinished] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(null);
 
+  // Which checkpoint (by time) is currently being shown, or null.
+  const [activeCheckpoint, setActiveCheckpoint] = useState(null);
+  // Checkpoints already shown this run, so they don't re-trigger on rewatch/seek.
+  const shownCheckpointsRef = useRef(new Set());
+
   function startQuiz() {
     if (!name.trim()) return;
 
@@ -35,6 +62,32 @@ export default function App() {
         });
       }
     }, 100);
+  }
+
+  function handleTimeUpdate() {
+    const video = videoRef.current;
+    if (!video || activeCheckpoint) return;
+
+    const t = video.currentTime;
+
+    for (const checkpoint of CHECKPOINTS) {
+      const alreadyShown = shownCheckpointsRef.current.has(checkpoint.time);
+      if (!alreadyShown && t >= checkpoint.time) {
+        shownCheckpointsRef.current.add(checkpoint.time);
+        video.pause();
+        setActiveCheckpoint(checkpoint);
+        break;
+      }
+    }
+  }
+
+  function continueVideo() {
+    setActiveCheckpoint(null);
+    if (videoRef.current) {
+      videoRef.current.play().catch((err) => {
+        console.log("Resume blocked: ", err);
+      });
+    }
   }
 
   function submitAnswer(index) {
@@ -84,6 +137,8 @@ export default function App() {
     setQuizIndex(0);
     setCurrentQuestion(null);
     setSelectedIndex(null);
+    setActiveCheckpoint(null);
+    shownCheckpointsRef.current = new Set();
 
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
@@ -263,6 +318,7 @@ export default function App() {
             playsInline
             crossOrigin="anonymous"
             onEnded={handleVideoEnd}
+            onTimeUpdate={handleTimeUpdate}
             className="w-full"
           />
         </div>
@@ -271,6 +327,32 @@ export default function App() {
           <p className="mt-6 text-center text-sm text-[#9FB0CC]">
             Loading questions&hellip;
           </p>
+        )}
+
+        {/* ---------- CHECKPOINT RECAP OVERLAY ---------- */}
+        {activeCheckpoint && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A1020]/85 p-3 backdrop-blur-sm sm:p-4">
+            <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#16223D] p-5 sm:p-9">
+              <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.18em] text-[#C9A06A]">
+                Quick Recap
+              </p>
+
+              <h2 className="mb-4 font-serif text-lg sm:text-2xl font-semibold leading-snug text-[#F7F5F1]">
+                {activeCheckpoint.title}
+              </h2>
+
+              <p className="mb-7 text-sm leading-relaxed text-[#9FB0CC] sm:text-base">
+                {activeCheckpoint.body}
+              </p>
+
+              <button
+                onClick={continueVideo}
+                className="w-full rounded-lg bg-[#C9A06A] py-3 text-sm font-semibold uppercase tracking-wide text-[#16223D] transition hover:bg-[#D8B381]"
+              >
+                Continue Video
+              </button>
+            </div>
+          </div>
         )}
 
         {currentQuestion && (
