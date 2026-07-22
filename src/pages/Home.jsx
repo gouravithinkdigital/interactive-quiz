@@ -1,31 +1,33 @@
 import { useRef, useState } from "react";
 // import videoFile from "../assets/videos/lesson.mp4";
 import { questions } from "../utils/quiz.js";
+
 // Corrected direct Cloudinary streaming URL
 const videoFile = "https://res.cloudinary.com/bvbtlaxk/video/upload/v1784703925/with_no_highlighter_subs_fpl4mn.mp4";
 
 const PASSING_SCORE = 8;
 
+// Fixed: Flattened array structure so handleTimeUpdate can iterate through objects directly
 const CHECKPOINTS = [
   {
     time: 56, // 0:56 - end of "what the POSH Act is / legal basis"
-    title: "The Legal Basis",
-    body: "The POSH Act (Sexual Harassment of Women at Workplace Act) is the law that gives this training its legal foundation — every workplace is legally required to comply with it.",
+    title: "कानूनी आधार",
+    body: "- POSH अधिनियम (कार्यस्थल पर महिलाओं का यौन उत्पीड़न अधिनियम) इस प्रशिक्षण को कानूनी आधार देता है।\n- हर कार्यस्थल के लिए इसका अनुपालन करना अनिवार्य है।",
   },
   {
     time: 110, // 1:50 - end of "who it protects / what counts as harassment"
-    title: "Who's Protected & What Counts",
-    body: "The law protects women in every workplace, regardless of sector. Sexual harassment includes unwelcome physical contact, standing too close, any behaviour that makes someone uncomfortable, and inappropriate gestures or remarks.",
+    title: "कौन सुरक्षित है और उत्पीड़न क्या माना जाता है",
+    body: "- यह कानून हर क्षेत्र में महिलाओं को सुरक्षा देता है।\n- यौन उत्पीड़न में शामिल हैं:\n  * अवांछित शारीरिक संपर्क\n  * बहुत पास खड़े होना\n  * असहज करने वाला व्यवहार\n  * अनुचित इशारे या टिप्पणियां",
   },
   {
     time: 140, // 2:20 - end of history + quid pro quo intro
-    title: "Where the Law Came From",
-    body: "The POSH Act traces back to the Bhanwari Devi case and the Supreme Court petition that followed, which led to the Vishakha Guidelines. Harassment falls into two types — this section introduced 'quid pro quo': when a benefit or promotion is made conditional on a demand.",
+    title: "यह कानून कहाँ से आया",
+    body: "- शुरुआत भंवरी देवी मामले और सुप्रीम कोर्ट की याचिका से हुई, जिससे विशाखा गाइडलाइंस बनीं।\n- 'क्विड प्रो क्रो' (Quid Pro Quo): जब किसी पदोन्नति या लाभ के बदले कोई शर्त या अनुचित मांग रखी जाती है।",
   },
   {
     time: 196, // 3:16 - end of workplace scenario dramatisation
-    title: "Recognising It in Practice",
-    body: "The scenario you just watched illustrated how this kind of behaviour can show up in everyday workplace interactions — often subtly, not always overt.",
+    title: "व्यावहारिक रूप में पहचानना",
+    body: "- दिखाता है कि यह व्यवहार रोजमर्रा के काम में कैसे आ सकता है।\n- यह अक्सर बहुत सूक्ष्म (subtle) होता है, हमेशा स्पष्ट रूप से सामने नहीं आता।",
   },
 ];
 
@@ -37,16 +39,14 @@ export default function App() {
   );
 
   const [started, setStarted] = useState(false);
-  const [quizActive, setQuizActive] = useState(false); // true once video ends and questions begin
-  const [quizIndex, setQuizIndex] = useState(0); // index into questions[] during the quiz
+  const [quizActive, setQuizActive] = useState(false);
+  const [quizIndex, setQuizIndex] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(null);
 
-  // Which checkpoint (by time) is currently being shown, or null.
   const [activeCheckpoint, setActiveCheckpoint] = useState(null);
-  // Checkpoints already shown this run, so they don't re-trigger on rewatch/seek.
   const shownCheckpointsRef = useRef(new Set());
 
   function startQuiz() {
@@ -104,12 +104,10 @@ export default function App() {
       const nextIndex = quizIndex + 1;
 
       if (nextIndex < questions.length) {
-        // Move to the next question
         setQuizIndex(nextIndex);
         setCurrentQuestion(questions[nextIndex]);
         setSelectedIndex(null);
       } else {
-        // All questions answered - show results
         setCurrentQuestion(null);
         setSelectedIndex(null);
         setQuizActive(false);
@@ -120,7 +118,6 @@ export default function App() {
   }
 
   function handleVideoEnd() {
-    // Video finished - now present all the questions, one at a time
     setQuizIndex(0);
     setScore(0);
     setQuizActive(true);
@@ -128,8 +125,6 @@ export default function App() {
   }
 
   function restart() {
-    // Sends the user all the way back to the start screen: full video
-    // rewatch + full question set is required again before they can pass.
     setStarted(false);
     setQuizActive(false);
     setFinished(false);
@@ -147,7 +142,6 @@ export default function App() {
 
   const passed = score >= PASSING_SCORE;
 
-  // ---------- START SCREEN ----------
   if (!started) {
     return (
       <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#101A30] p-4 sm:p-6">
@@ -207,7 +201,6 @@ export default function App() {
     );
   }
 
-  // ---------- COMPLETION SCREEN ----------
   if (finished) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#101A30] p-4 sm:p-6">
@@ -274,7 +267,6 @@ export default function App() {
     );
   }
 
-  // ---------- VIDEO / QUIZ SCREEN ----------
   return (
     <div className="min-h-screen bg-[#101A30] p-3 sm:p-8">
       <div className="mx-auto max-w-5xl">
@@ -341,9 +333,16 @@ export default function App() {
                 {activeCheckpoint.title}
               </h2>
 
-              <p className="mb-7 text-sm leading-relaxed text-[#9FB0CC] sm:text-base">
-                {activeCheckpoint.body}
-              </p>
+              {/* Formatted bullet list rendering */}
+              <ul className="mb-7 list-disc space-y-2 pl-5 text-sm leading-relaxed text-[#9FB0CC] sm:text-base">
+                {activeCheckpoint.body
+                  .split("\n")
+                  .filter((line) => line.trim() !== "")
+                  .map((line, index) => {
+                    const cleanLine = line.replace(/^[\s-*]+/, "").trim();
+                    return <li key={index}>{cleanLine}</li>;
+                  })}
+              </ul>
 
               <button
                 onClick={continueVideo}
