@@ -312,6 +312,7 @@ export default function App() {
             onEnded={handleVideoEnd}
             onTimeUpdate={handleTimeUpdate}
             className="w-full"
+            controls
           />
         </div>
 
